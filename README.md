@@ -1,2 +1,3 @@
 # TouristAgency
-Tourist agency for unpopular destinations.
+Website for a tourist agency specialised in unpopular destinations.
+
