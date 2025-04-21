@@ -1,6 +1,7 @@
 using TouristAgency.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TouristAgency.Models;
 namespace TouristAgency
 
 {
@@ -17,6 +18,7 @@ namespace TouristAgency
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
 
             var app = builder.Build();
 
