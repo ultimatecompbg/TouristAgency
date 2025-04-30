@@ -1,11 +1,33 @@
-﻿@{
-    ViewData["Title"] = "Welcome";
+﻿@model IEnumerable<TouristAgency.Models.TravelPackage>
+@{
+    ViewData["Title"] = "Начало";
 }
-<h1>Welcome to Tourist Agency</h1>
-<p>Select an area to manage:</p>
-<div class="d-grid gap-2 d-md-flex">
-    <a class="btn btn-primary me-md-2" asp-controller="Destinations" asp-action="Index">Manage Destinations</a>
-    <a class="btn btn-secondary me-md-2" asp-controller="Categories" asp-action="Index">Manage Categories</a>
-    <a class="btn btn-success me-md-2" asp-controller="TravelPackages" asp-action="Index">Manage Packages</a>
-    <a class="btn btn-info" asp-controller="Bookings" asp-action="Index">Manage Bookings</a>
+
+<div class="text-center">
+    <h1 class="display-4">Добре дошли във Vix Travel!</h1>
+    <p class="lead">Изследвайте нови хоризонти с непопулярни, но удивителни дестинации.</p>
 </div>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center">В момента няма налични оферти.</p>
+}
+else
+{
+    <div class="row mt-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Title</h5>
+                        <p class="card-text">@item.Description?.Substring(0, Math.Min(item.Description.Length, 100))...</p>
+                        <p><strong>Дестинация:</strong> @item.Destination?.Name</p>
+                        <p><strong>Цена:</strong> @item.Price.ToString("F2") лв.</p>
+                        <a href="/TravelPackages/Details/@item.Id" class="btn btn-outline-primary">Виж повече</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
