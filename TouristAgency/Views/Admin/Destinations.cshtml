@@ -1,0 +1,30 @@
+﻿@model IEnumerable<TouristAgency.Models.Destination>
+@{
+    ViewData["Title"] = "Дестинации";
+}
+
+<h2>Управление на дестинации</h2>
+<a asp-action="CreateDestination" class="btn btn-success mb-3">+ Добави нова дестинация</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Име</th>
+            <th>Описание</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dest in Model)
+        {
+            <tr>
+                <td>@dest.Name</td>
+                <td>@dest.Description</td>
+                <td>
+                    <a asp-action="EditDestination" asp-route-id="@dest.Id" class="btn btn-sm btn-warning">Редактирай</a>
+                    <a asp-action="DeleteDestination" asp-route-id="@dest.Id" class="btn btn-sm btn-danger">Изтрий</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

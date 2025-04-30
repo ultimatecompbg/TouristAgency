@@ -1,0 +1,21 @@
+﻿@model TouristAgency.Models.Destination
+@{
+    ViewData["Title"] = "Изтриване на дестинация";
+}
+
+<h2>Сигурни ли сте, че искате да изтриете тази дестинация?</h2>
+
+<div class="border p-3 mb-3">
+    <dl class="row">
+        <dt class="col-sm-3">Име</dt>
+        <dd class="col-sm-9">@Model.Name</dd>
+        <dt class="col-sm-3">Описание</dt>
+        <dd class="col-sm-9">@Model.Description</dd>
+    </dl>
+
+    <form asp-action="DeleteDestination" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Изтрий</button>
+        <a asp-action="Destinations" class="btn btn-secondary">Отказ</a>
+    </form>
+</div>

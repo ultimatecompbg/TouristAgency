@@ -1,0 +1,64 @@
+﻿@model TouristAgency.Models.Destination
+@{
+    ViewData["Title"] = "Редактиране на дестинация";
+}
+
+<h2>Редактиране на дестинация</h2>
+
+<form asp-action="EditDestination" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Локация на картата:</label>
+        <div id="map" style="height: 400px;" class="mb-3"></div>
+        <input asp-for="Latitude" class="form-control" readonly />
+        <input asp-for="Longitude" class="form-control" readonly />
+        <span class="text-muted">Кликни върху картата, за да актуализираш координатите</span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Запази</button>
+</form>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        var initialLat = parseFloat('@Model.Latitude');
+        var initialLng = parseFloat('@Model.Longitude');
+        var map = L.map('map').setView([initialLat || 42.7, initialLng || 25.3], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker = null;
+        if (!isNaN(initialLat) && !isNaN(initialLng)) {
+            marker = L.marker([initialLat, initialLng]).addTo(map);
+        }
+
+        map.on('click', function (e) {
+            var lat = e.latlng.lat.toFixed(6);
+            var lng = e.latlng.lng.toFixed(6);
+
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(map);
+            }
+
+            document.getElementById("Latitude").value = lat;
+            document.getElementById("Longitude").value = lng;
+        });
+    </script>
+}

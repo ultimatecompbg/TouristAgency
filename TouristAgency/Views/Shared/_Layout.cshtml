@@ -27,12 +27,19 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
-                            if (User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="Index">Админ панел</a>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                        Админ
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">Потребители</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Destinations">Дестинации</a></li>
+                                    </ul>
                                 </li>
                             }
+
                             else if (User.IsInRole("TravelAgency"))
                             {
                                 <li class="nav-item">
