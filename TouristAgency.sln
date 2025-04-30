@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TouristAgency", "TouristAgency\TouristAgency.csproj", "{65B46F1E-8996-4C27-BEAB-35C3C4821ED2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TouristAgencyTests", "TouristAgencyTests\TouristAgencyTests.csproj", "{388C8748-CAB5-4E4B-A7F6-C9FC1CF8A6FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{65B46F1E-8996-4C27-BEAB-35C3C4821ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65B46F1E-8996-4C27-BEAB-35C3C4821ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65B46F1E-8996-4C27-BEAB-35C3C4821ED2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{388C8748-CAB5-4E4B-A7F6-C9FC1CF8A6FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{388C8748-CAB5-4E4B-A7F6-C9FC1CF8A6FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{388C8748-CAB5-4E4B-A7F6-C9FC1CF8A6FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{388C8748-CAB5-4E4B-A7F6-C9FC1CF8A6FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
