@@ -1,0 +1,43 @@
+﻿@model IEnumerable<TouristAgency.Models.ApplicationUser>
+@using Microsoft.AspNetCore.Identity
+
+@{
+    ViewData["Title"] = "Управление на потребители";
+}
+
+<h2>Управление на потребители</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Име (Email)</th>
+            <th>Роля</th>
+            <th>Одобрен</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <span>@user.UserName</span>
+                    }
+                </td>
+                <td>@(user.IsApproved ? "Да" : "Не")</td>
+                <td>
+                    @if (!user.IsApproved)
+                    {
+                        <form asp-action="Approve" method="post">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Одобри</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
