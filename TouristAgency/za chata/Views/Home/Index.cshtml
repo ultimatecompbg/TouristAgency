@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+}
+<h1>Welcome to Tourist Agency</h1>
+<p>Select an area to manage:</p>
+<div class="d-grid gap-2 d-md-flex">
+    <a class="btn btn-primary me-md-2" asp-controller="Destinations" asp-action="Index">Manage Destinations</a>
+    <a class="btn btn-secondary me-md-2" asp-controller="Categories" asp-action="Index">Manage Categories</a>
+    <a class="btn btn-success me-md-2" asp-controller="TravelPackages" asp-action="Index">Manage Packages</a>
+    <a class="btn btn-info" asp-controller="Bookings" asp-action="Index">Manage Bookings</a>
+</div>
