@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TouristAgency.Data;
 using TouristAgency.Models;
 
@@ -18,9 +19,17 @@ public class TravelPackagesController : Controller
         _userManager = userManager;
     }
 
+    private async Task<bool> IsUserApproved()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        return user != null && user.IsApproved;
+    }
+
     public async Task<IActionResult> MyPackages()
     {
-        var userId = _userManager.GetUserId(User);
+        if (!await IsUserApproved()) return Forbid();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var packages = await _context.TravelPackages
             .Include(p => p.Destination)
             .Where(p => p.TourOperatorId == userId)
@@ -28,8 +37,10 @@ public class TravelPackagesController : Controller
         return View(packages);
     }
 
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        if (!await IsUserApproved()) return Forbid();
+
         ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name");
         return View();
     }
@@ -38,9 +49,11 @@ public class TravelPackagesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(TravelPackage model)
     {
+        if (!await IsUserApproved()) return Forbid();
+
         if (ModelState.IsValid)
         {
-            model.TourOperatorId = _userManager.GetUserId(User);
+            model.TourOperatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             _context.Add(model);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(MyPackages));
@@ -52,7 +65,9 @@ public class TravelPackagesController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var userId = _userManager.GetUserId(User);
+        if (!await IsUserApproved()) return Forbid();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var package = await _context.TravelPackages.FindAsync(id);
         if (package == null || package.TourOperatorId != userId)
         {
@@ -66,7 +81,9 @@ public class TravelPackagesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, TravelPackage model)
     {
-        var userId = _userManager.GetUserId(User);
+        if (!await IsUserApproved()) return Forbid();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var original = await _context.TravelPackages.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
 
         if (original == null || original.TourOperatorId != userId)
@@ -88,7 +105,9 @@ public class TravelPackagesController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
-        var userId = _userManager.GetUserId(User);
+        if (!await IsUserApproved()) return Forbid();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var package = await _context.TravelPackages
             .Include(p => p.Destination)
             .FirstOrDefaultAsync(p => p.Id == id && p.TourOperatorId == userId);
@@ -105,7 +124,9 @@ public class TravelPackagesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var userId = _userManager.GetUserId(User);
+        if (!await IsUserApproved()) return Forbid();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var package = await _context.TravelPackages.FindAsync(id);
         if (package == null || package.TourOperatorId != userId)
         {
