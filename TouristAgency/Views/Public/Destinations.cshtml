@@ -1,0 +1,63 @@
+﻿@model IEnumerable<TouristAgency.Models.Destination>
+@{
+    ViewData["Title"] = "Дестинации";
+}
+
+<h2>Всички дестинации</h2>
+
+<form method="get" class="mb-3">
+    <input type="text" name="search" placeholder="Търси дестинация..." class="form-control" />
+</form>
+
+<div id="map" style="height: 450px;" class="mb-4"></div>
+
+@foreach (var dest in Model)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h4>@dest.Name</h4>
+            <p>@dest.Description</p>
+
+            @if (dest.TravelPackages.Any())
+            {
+                <ul>
+                    @foreach (var pkg in dest.TravelPackages)
+                    {
+                        <li>
+                            <strong>@pkg.Title</strong> – @pkg.Price лв.
+                            <em>(@pkg.StartDate.ToShortDateString() - @pkg.EndDate.ToShortDateString())</em>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p><em>Няма налични пакети за тази дестинация.</em></p>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        var map = L.map('map').setView([42.7, 25.3], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        @foreach (var dest in Model)
+        {
+            if (dest.Latitude != 0 && dest.Longitude != 0)
+            {
+                <text>
+                            L.marker([@dest.Latitude, @dest.Longitude])
+                             .addTo(map)
+                             .bindPopup("<b>@dest.Name</b><br />@dest.Description");
+                </text>
+            }
+        }
+    </script>
+}

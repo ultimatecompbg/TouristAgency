@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using TouristAgency.Data;
 using TouristAgency.Models;
 
@@ -53,13 +54,24 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateDestination(Destination destination)
     {
+        Debug.WriteLine($"Получена дестинация: {destination.Name}, lat: {destination.Latitude}, lng: {destination.Longitude}");
         if (ModelState.IsValid)
         {
             _context.Add(destination);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Destinations));
+        }else
+        {
+            foreach (var entry in ModelState)
+            {
+                foreach (var error in entry.Value.Errors)
+                {
+                    Debug.WriteLine($"ГРЕШКА при '{entry.Key}': {error.ErrorMessage}");
+                }
+            }
         }
-        return View(destination);
+
+            return View(destination);
     }
 
     [HttpGet]

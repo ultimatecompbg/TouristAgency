@@ -20,8 +20,10 @@
     <div class="form-group">
         <label>Избери локация от картата:</label>
         <div id="map" style="height: 400px;" class="mb-3"></div>
-        <input asp-for="Latitude" class="form-control" readonly />
-        <input asp-for="Longitude" class="form-control" readonly />
+        <input asp-for="Latitude" class="form-control" id="Latitude" name="Latitude" readonly />
+        <span asp-validation-for="Latitude" class="text-danger"></span>
+        <input asp-for="Longitude" class="form-control" id="Longitude" name="Longitude" readonly />
+        <span asp-validation-for="Longitude" class="text-danger"></span>
         <span class="text-muted">Кликни върху картата, за да зададеш координати</span>
     </div>
 
@@ -29,6 +31,7 @@
 </form>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 

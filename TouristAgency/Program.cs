@@ -1,7 +1,9 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TouristAgency.Data;
 using TouristAgency.Models;
+using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ApplicationDbContextConnection")
@@ -23,6 +25,8 @@ var app = builder.Build();
 async Task CreateRolesAsync(IServiceProvider serviceProvider)
 {
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
     string[] roles = { "Admin", "User", "TravelAgency" };
 
     foreach (var role in roles)
@@ -31,6 +35,13 @@ async Task CreateRolesAsync(IServiceProvider serviceProvider)
         {
             await roleManager.CreateAsync(new IdentityRole(role));
         }
+    }
+    var adminEmail = "admin@vixtravel.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser != null && !(await userManager.IsInRoleAsync(adminUser, "Admin")))
+    {
+        await userManager.AddToRoleAsync(adminUser, "Admin");
     }
 }
 
