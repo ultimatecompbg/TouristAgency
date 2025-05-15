@@ -1,0 +1,14 @@
+﻿@model TouristAgency.Models.TravelPackage
+@{
+    ViewData["Title"] = "Детайли за туристически пакет";
+}
+
+<h2>@Model.Title</h2>
+<p><strong>Описание:</strong> @Model.Description</p>
+<p><strong>Цена:</strong> @string.Format("{0:C}", Model.Price)</p>
+<p><strong>Дестинация:</strong> @Model.Destination?.Name</p>
+<p><strong>Период:</strong> @Model.StartDate.ToShortDateString() – @Model.EndDate.ToShortDateString()</p>
+<p><strong>Свободни места:</strong> @Model.AvailableSlots</p>
+<p><strong>Организатор:</strong> @Model.TourOperator?.UserName</p>
+
+<a asp-action="MyPackages" class="btn btn-secondary">Назад</a>

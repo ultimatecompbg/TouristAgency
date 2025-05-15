@@ -165,4 +165,18 @@ public class TravelPackagesController : Controller
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(MyPackages));
     }
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var package = await _context.TravelPackages
+            .Include(p => p.Destination)
+            .Include(p => p.TourOperator)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (package == null)
+            return NotFound();
+
+        return View(package);
+    }
+
 }
