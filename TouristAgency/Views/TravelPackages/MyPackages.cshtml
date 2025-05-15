@@ -1,0 +1,39 @@
+﻿@model IEnumerable<TouristAgency.Models.TravelPackage>
+@{
+    ViewData["Title"] = "Моите пакети";
+}
+
+<h2>Моите туристически пакети</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Заглавие</th>
+            <th>Описание</th>
+            <th>Цена</th>
+            <th>Слотове</th>
+            <th>Дестинация</th>
+            <th>Дати</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Description</td>
+                <td>@string.Format("{0:C}", item.Price)</td>
+                <td>@item.AvailableSlots</td>
+                <td>@item.Destination?.Name</td>
+                <td>@item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактирай</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Изтрий</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-success">Създай нов пакет</a>

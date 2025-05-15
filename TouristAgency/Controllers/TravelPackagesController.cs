@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Security.Claims;
 using TouristAgency.Data;
 using TouristAgency.Models;
@@ -58,6 +59,20 @@ public class TravelPackagesController : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(MyPackages));
         }
+        else
+        {
+            if (!ModelState.IsValid)
+            {
+                foreach (var entry in ModelState)
+                {
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        Debug.WriteLine($"❌ {entry.Key}: {error.ErrorMessage}");
+                    }
+                }
+            }
+
+        }
         ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name", model.DestinationId);
         return View(model);
     }
@@ -97,6 +112,19 @@ public class TravelPackagesController : Controller
             _context.Update(model);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(MyPackages));
+        }
+        else {
+            if (!ModelState.IsValid)
+            {
+                foreach (var entry in ModelState)
+                {
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        Debug.WriteLine($"❌ {entry.Key}: {error.ErrorMessage}");
+                    }
+                }
+            }
+
         }
         ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name", model.DestinationId);
         return View(model);
