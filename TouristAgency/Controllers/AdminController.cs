@@ -21,8 +21,18 @@ public class AdminController : Controller
     // User management
     public async Task<IActionResult> Users()
     {
-        var users = await _context.Users.ToListAsync();
-        return View(users);
+        var users = await _userManager.Users.ToListAsync();
+        var agencies = new List<ApplicationUser>();
+
+        foreach (var user in users)
+        {
+            if (await _userManager.IsInRoleAsync(user, "TravelAgency"))
+            {
+                agencies.Add(user);
+            }
+        }
+
+        return View(agencies);
     }
 
     [HttpPost]
@@ -35,6 +45,26 @@ public class AdminController : Controller
             await _userManager.UpdateAsync(user);
         }
         return RedirectToAction("Users");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Revoke(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user != null && await _userManager.IsInRoleAsync(user, "TravelAgency"))
+        {
+            user.IsApproved = false;
+            await _userManager.UpdateAsync(user);
+        }
+        return RedirectToAction("Users");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ViewAgency(string id)
+    {
+        var agency = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (agency == null || !(await _userManager.IsInRoleAsync(agency, "TravelAgency"))) return NotFound();
+        return View("~/Views/Admin/ViewAgency.cshtml", agency);
     }
 
     // Destination management
@@ -60,7 +90,8 @@ public class AdminController : Controller
             _context.Add(destination);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Destinations));
-        }else
+        }
+        else
         {
             foreach (var entry in ModelState)
             {
@@ -71,7 +102,7 @@ public class AdminController : Controller
             }
         }
 
-            return View(destination);
+        return View(destination);
     }
 
     [HttpGet]
@@ -101,8 +132,8 @@ public class AdminController : Controller
     {
         var destination = await _context.Destinations.FindAsync(id);
         if (destination == null) return NotFound();
-        return View(destination);
-    }
+        return View(destination);   
+    }  
 
     [HttpPost, ActionName("DeleteDestination")]
     [ValidateAntiForgeryToken]

@@ -165,6 +165,7 @@ public class TravelPackagesController : Controller
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(MyPackages));
     }
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
@@ -178,5 +179,6 @@ public class TravelPackagesController : Controller
 
         return View(package);
     }
+
 
 }

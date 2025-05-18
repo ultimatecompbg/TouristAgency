@@ -1,39 +1,48 @@
 ﻿@model IEnumerable<TouristAgency.Models.ApplicationUser>
-@using Microsoft.AspNetCore.Identity
-
 @{
-    ViewData["Title"] = "Управление на потребители";
+    ViewData["Title"] = "Управление на агенции";
 }
 
-<h2>Управление на потребители</h2>
+<h2>Управление на туристически агенции</h2>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Име (Email)</th>
-            <th>Роля</th>
-            <th>Одобрен</th>
-            <th>Действия</th>
+            <th>Име</th>
+            <th>Имейл</th>
+            <th>Статус</th>
+            <th>Действие</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var user in Model)
         {
             <tr>
+                <td>@user.UserName</td>
                 <td>@user.Email</td>
                 <td>
-                    @if (User.IsInRole("Admin"))
+                    @if (user.IsApproved)
                     {
-                        <span>@user.UserName</span>
+                        <span class="text-success">Одобрен</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger">Изчаква</span>
                     }
                 </td>
-                <td>@(user.IsApproved ? "Да" : "Не")</td>
                 <td>
                     @if (!user.IsApproved)
                     {
                         <form asp-action="Approve" method="post">
                             <input type="hidden" name="userId" value="@user.Id" />
-                            <button type="submit" class="btn btn-sm btn-success">Одобри</button>
+                            <button type="submit" class="btn btn-success btn-sm">Одобри</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Revoke" method="post">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-warning btn-sm">Отнеми достъп</button>
                         </form>
                     }
                 </td>

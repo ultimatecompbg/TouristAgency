@@ -1,0 +1,27 @@
+﻿@model TouristAgency.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Профил на агенция";
+}
+
+<h2>Профил на туристическа агенция</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">@Model.UserName</h4>
+        <p class="card-text"><strong>Email:</strong> @Model.Email</p>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="card-text"><strong>Описание:</strong> @Model.Description</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+        {
+            <p class="card-text"><strong>Телефон:</strong> @Model.PhoneNumber</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.Address))
+        {
+            <p class="card-text"><strong>Адрес:</strong> @Model.Address</p>
+        }
+    </div>
+</div>
+
+<a asp-action="Users" class="btn btn-secondary mt-3">Назад</a>

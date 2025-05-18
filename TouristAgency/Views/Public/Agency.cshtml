@@ -1,0 +1,27 @@
+﻿@model TouristAgency.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Профил на агенция: " + Model.UserName;
+}
+
+<h2>@Model.UserName</h2>
+<p><strong>Имейл:</strong> @Model.Email</p>
+<p><strong>Одобрен:</strong> @(Model.IsApproved ? "Да" : "Не")</p>
+
+<h4>Туристически пакети, предлагани от тази агенция:</h4>
+@if (Model.TravelPackages != null && Model.TravelPackages.Any())
+{
+    <ul class="list-group">
+        @foreach (var pkg in Model.TravelPackages)
+        {
+            <li class="list-group-item">
+                <a asp-controller="TravelPackages" asp-action="Details" asp-route-id="@pkg.Id">
+                    @pkg.Title
+                </a> - @string.Format("{0:C}", pkg.Price)
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted">Тази агенция все още няма публикувани пакети.</p>
+}
