@@ -275,22 +275,22 @@ namespace TouristAgency.Controllers
             return RedirectToAction("ConfirmBooking", new { id = booking.Id });
         }
 
-        [Authorize(Roles = "User")]
-        [HttpGet]
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmBooking(int id)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var booking = await _context.Bookings
                 .Include(b => b.TravelPackage)
-                    .ThenInclude(tp => tp.Destination)
-                .Include(b => b.TravelPackage)
-                    .ThenInclude(tp => tp.TourOperator)
-                .Include(b => b.Passengers)
-                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier));
-            booking.Status = "Платена";
-            if (booking == null)
-                return NotFound();
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
-            return View("ConfirmBooking", booking);
+            if (booking == null) return NotFound();
+
+            booking.Status = "Потвърдена";
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Invoice", new { id = booking.Id });
         }
 
 
