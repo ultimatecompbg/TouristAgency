@@ -1,0 +1,43 @@
+﻿@model IEnumerable<TouristAgency.Models.Booking>
+
+@{
+    ViewData["Title"] = "Моите резервации";
+}
+
+<h2>Моите резервации</h2>
+
+@if (!Model.Any())
+{
+    <p>Нямате направени резервации.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Пакет</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Обща цена</th>
+                <th>Места</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in Model)
+            {
+                <tr>
+                            <td>
+            <a asp-controller="Bookings" asp-action="Details" asp-route-id="@booking.Id">
+                            @booking.TravelPackage?.Title
+            </a>
+        </td>
+
+                    <td>@booking.CreatedOn.ToShortDateString()</td>
+                    <td>@booking.Status</td>
+                    <td>@booking.TotalPrice.ToString("C")</td>
+                    <td>@booking.NumberOfSlots</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

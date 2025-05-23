@@ -1,0 +1,30 @@
+﻿@model TouristAgency.Models.Booking
+@{
+    ViewData["Title"] = "Потвърди резервация";
+}
+
+<h2>Потвърди резервацията си</h2>
+
+<div class="alert alert-info">
+    Моля, прегледай детайлите по-долу и натисни "Плати", за да завършиш резервацията.
+</div>
+
+<p><strong>Пакет:</strong> @Model.TravelPackage.Title</p>
+<p><strong>Дестинация:</strong> @Model.TravelPackage.Destination?.Name</p>
+<p><strong>Организатор:</strong> @Model.TravelPackage.TourOperator?.UserName</p>
+<p><strong>Брой места:</strong> @Model.NumberOfSlots</p>
+<p><strong>Обща цена:</strong> @Model.TotalPrice.ToString("C")</p>
+
+<h4>Пътници:</h4>
+<ul>
+    @foreach (var p in Model.Passengers)
+    {
+        <li>@p.FullName</li>
+    }
+</ul>
+
+<form asp-action="ConfirmBooking" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-success">Плати и потвърди</button>
+    <a href="/Bookings/MyBookings" class="btn btn-secondary">Назад</a>
+</form>

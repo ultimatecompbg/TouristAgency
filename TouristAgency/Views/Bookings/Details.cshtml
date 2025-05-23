@@ -1,42 +1,32 @@
 ﻿@model TouristAgency.Models.Booking
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Детайли за резервация";
 }
 
-<h1>Details</h1>
+<h2>Детайли за резервация</h2>
 
-<div>
-    <h4>Booking</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TravelPackage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TravelPackage.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedOn)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedOn)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<p><strong>Пакет:</strong> @Model.TravelPackage?.Title</p>
+<p><strong>Дестинация:</strong> @Model.TravelPackage?.Destination?.Name</p>
+<p><strong>Организатор:</strong> @Model.TravelPackage?.TourOperator?.UserName</p>
+<p><strong>Обща цена:</strong> @Model.TotalPrice.ToString("C")</p>
+<p><strong>Места:</strong> @Model.NumberOfSlots</p>
+<p><strong>Статус:</strong> @Model.Status</p>
+<p><strong>Дата:</strong> @Model.CreatedOn.ToShortDateString()</p>
+
+@if (Model.Passengers != null && Model.Passengers.Any())
+{
+    <h4>Имена на пътници:</h4>
+    <ul>
+        @foreach (var passenger in Model.Passengers)
+        {
+            <li>@passenger.FullName</li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted">Няма записани пътници.</p>
+}
+
+<a asp-action="MyBookings" class="btn btn-secondary">Назад</a>

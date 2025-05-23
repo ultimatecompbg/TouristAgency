@@ -152,19 +152,24 @@ public class TravelPackagesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        if (!await IsUserApproved()) return Forbid();
+        var package = await _context.TravelPackages
+            .Include(p => p.Bookings)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var package = await _context.TravelPackages.FindAsync(id);
-        if (package == null || package.TourOperatorId != userId)
-        {
+        if (package == null)
             return NotFound();
+
+        if (package.Bookings != null && package.Bookings.Any())
+        {
+            TempData["Error"] = "Не можете да изтриете пакет, за който има направени резервации.";
+            return RedirectToAction(nameof(MyPackages));
         }
 
         _context.TravelPackages.Remove(package);
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(MyPackages));
     }
+
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> Details(int id)

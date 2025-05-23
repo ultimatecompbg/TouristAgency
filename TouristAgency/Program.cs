@@ -1,9 +1,9 @@
-
+﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TouristAgency.Data;
 using TouristAgency.Models;
-using static System.Formats.Asn1.AsnWriter;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ApplicationDbContextConnection")
@@ -68,4 +68,8 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+var cultureInfo = new CultureInfo("en-GB");
+cultureInfo.NumberFormat.CurrencySymbol = "лв.";
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 app.Run();

@@ -41,13 +41,18 @@ namespace TouristAgency.Controllers
 
             var booking = await _context.Bookings
                 .Include(b => b.TravelPackage)
-                .Include(b => b.User)
+                    .ThenInclude(p => p.Destination)
+                .Include(b => b.TravelPackage)
+                    .ThenInclude(p => p.TourOperator)
                 .Include(b => b.Passengers)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
             if (booking == null) return NotFound();
 
             return View(booking);
         }
+
 
         public IActionResult Create()
         {
@@ -64,7 +69,7 @@ namespace TouristAgency.Controllers
             {
                 _context.Add(booking);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Confirmation), new { id = booking.Id });
             }
             ViewData["TravelPackageId"] = new SelectList(_context.TravelPackages, "Id", "Title", booking.TravelPackageId);
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", booking.UserId);
@@ -177,6 +182,7 @@ namespace TouristAgency.Controllers
 
             return RedirectToAction(nameof(Confirmation), new { id = booking.Id });
         }
+       
 
         [Authorize]
         public async Task<IActionResult> Confirmation(int id)
@@ -203,6 +209,21 @@ namespace TouristAgency.Controllers
 
             return View("Invoice", booking);
         }
+        [Authorize(Roles = "TravelAgency")]
+        public async Task<IActionResult> AgencyReservations()
+        {
+            var agencyId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var bookings = await _context.Bookings
+                .Include(b => b.TravelPackage)
+                    .ThenInclude(tp => tp.Destination)
+                .Include(b => b.Passengers)
+                .Include(b => b.User)
+                .Where(b => b.TravelPackage.TourOperatorId == agencyId)
+                .ToListAsync();
+
+            return View("AgencyReservations", bookings);
+        }
 
         [Authorize(Roles = "User")]
         public async Task<IActionResult> MyBookings()
@@ -215,8 +236,8 @@ namespace TouristAgency.Controllers
 
             return View("MyBookings", bookings);
         }
-        [HttpPost]
         [Authorize(Roles = "User")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFromPackage(int packageId, int slotCount, List<string> travelerNames)
         {
@@ -250,8 +271,29 @@ namespace TouristAgency.Controllers
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("MyBookings", "Bookings");
+            // ✅ Redirect to payment/confirmation page
+            return RedirectToAction("ConfirmBooking", new { id = booking.Id });
         }
+
+        [Authorize(Roles = "User")]
+        [HttpGet]
+        public async Task<IActionResult> ConfirmBooking(int id)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.TravelPackage)
+                    .ThenInclude(tp => tp.Destination)
+                .Include(b => b.TravelPackage)
+                    .ThenInclude(tp => tp.TourOperator)
+                .Include(b => b.Passengers)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier));
+            booking.Status = "Платена";
+            if (booking == null)
+                return NotFound();
+
+            return View("ConfirmBooking", booking);
+        }
+
+
 
     }
 }
