@@ -25,12 +25,17 @@ namespace TouristAgency.Data
                 .HasOne(b => b.TravelPackage)
                 .WithMany(tp => tp.Bookings)
                 .HasForeignKey(b => b.TravelPackageId)
-                .OnDelete(DeleteBehavior.Restrict); // <-- IMPORTANT
+                .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<BookingPassenger>()
+                .HasOne(p => p.Booking)
+                .WithMany(b => b.Passengers)
+                .HasForeignKey(p => p.BookingId);
         }
 
         public DbSet<Destination> Destinations { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<TravelPackage> TravelPackages { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<BookingPassenger> BookingPassengers { get; set; }
     }
 }

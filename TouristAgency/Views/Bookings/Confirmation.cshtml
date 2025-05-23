@@ -1,0 +1,21 @@
+@model TouristAgency.Models.Booking
+@{
+    ViewData["Title"] = "Потвърждение";
+}
+
+<h2>Успешна резервация</h2>
+
+<p>Пакет: <strong>@Model.TravelPackage.Title</strong></p>
+<p>Брой места: @Model.NumberOfSlots</p>
+<p>Обща сума: <strong>@Model.TotalPrice.ToString("C")</strong></p>
+<p>Дата: @Model.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+
+<h4>Пътници:</h4>
+<ul>
+@foreach (var p in Model.Passengers)
+{
+    <li>@p.FullName</li>
+}
+</ul>
+
+<a href="/Bookings/Index" class="btn btn-primary mt-3">Назад</a>

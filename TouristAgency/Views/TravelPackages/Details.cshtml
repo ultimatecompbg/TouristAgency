@@ -1,4 +1,5 @@
 ﻿@model TouristAgency.Models.TravelPackage
+
 @{
     ViewData["Title"] = "Детайли за туристически пакет";
 }
@@ -9,6 +10,53 @@
 <p><strong>Дестинация:</strong> @Model.Destination?.Name</p>
 <p><strong>Период:</strong> @Model.StartDate.ToShortDateString() – @Model.EndDate.ToShortDateString()</p>
 <p><strong>Свободни места:</strong> @Model.AvailableSlots</p>
-<p><strong>Организатор:</strong> @Model.TourOperator?.UserName</p>
+<p><strong>Организатор:</strong> @Model.TourOperator?.Email</p>
 
-<a asp-action="MyPackages" class="btn btn-secondary">Назад</a>
+<hr />
+
+@if (User.IsInRole("User"))
+{
+    <h4>Резервирай</h4>
+
+    <form asp-controller="Bookings" asp-action="CreateFromPackage" method="post">
+        <input type="hidden" name="packageId" value="@Model.Id" />
+
+        <div class="form-group">
+            <label>Брой места:</label>
+            <input type="number" name="slotCount" class="form-control" value="1" min="1" max="@Model.AvailableSlots" required />
+        </div>
+
+        <div class="form-group mt-2">
+            <label>Имена на пътниците:</label>
+            <div id="travelerInputs">
+                <input type="text" name="travelerNames" class="form-control mb-2" placeholder="Име на пътник" required />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Резервирай</button>
+    </form>
+
+    <script>
+        const slotInput = document.querySelector('input[name="slotCount"]');
+        const travelerInputs = document.getElementById('travelerInputs');
+
+        slotInput.addEventListener('input', () => {
+            travelerInputs.innerHTML = '';
+            const count = parseInt(slotInput.value);
+            for (let i = 0; i < count; i++) {
+                const input = document.createElement('input');
+                input.name = 'travelerNames';
+                input.className = 'form-control mb-2';
+                input.placeholder = `Име на пътник #${i + 1}`;
+                input.required = true;
+                travelerInputs.appendChild(input);
+            }
+        });
+    </script>
+}
+else
+{
+    <p class="text-muted">Само потребители могат да правят резервации.</p>
+}
+
+<a asp-controller="Public" asp-action="Destinations" class="btn btn-secondary mt-3">Назад</a>

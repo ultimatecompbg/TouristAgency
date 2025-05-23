@@ -1,0 +1,43 @@
+@model TouristAgency.Models.BookingViewModel
+@{
+    var package = ViewBag.Package as TouristAgency.Models.TravelPackage;
+    ViewData["Title"] = "Резервирай пакет";
+}
+
+<h2>Резервирай: @package.Title</h2>
+<p>@package.Description</p>
+<p><strong>Цена на място:</strong> @package.Price.ToString("C")</p>
+
+<form asp-action="CreateForUser" method="post">
+    <input type="hidden" asp-for="TravelPackageId" />
+
+    <div class="form-group">
+        <label>Брой места:</label>
+        <input asp-for="NumberOfSlots" class="form-control" min="1" max="10" />
+        <span asp-validation-for="NumberOfSlots" class="text-danger"></span>
+    </div>
+
+    <div id="passengerFields"></div>
+
+    <button type="submit" class="btn btn-success mt-3">Потвърди резервация</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const numberInput = document.querySelector('#NumberOfSlots');
+        const container = document.getElementById('passengerFields');
+
+        numberInput.addEventListener('input', () => {
+            const count = parseInt(numberInput.value);
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                container.innerHTML += `
+                    <div class="form-group mt-2">
+                        <label>Име на пътник ${i + 1}</label>
+                        <input name="PassengerNames" class="form-control" required />
+                    </div>`;
+            }
+        });
+    </script>
+}

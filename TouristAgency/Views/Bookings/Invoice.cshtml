@@ -1,0 +1,31 @@
+@model TouristAgency.Models.Booking
+@{
+    ViewData["Title"] = "Фактура";
+    var date = Model.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy");
+}
+
+<div style="max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ccc;">
+    <h2>Фактура № @Model.Id</h2>
+    <p><strong>Дата:</strong> @date</p>
+    <p><strong>Име на клиент:</strong> @User.Identity.Name</p>
+
+    <hr />
+
+    <h4>Детайли на резервацията</h4>
+    <p><strong>Пакет:</strong> @Model.TravelPackage.Title</p>
+    <p><strong>Описание:</strong> @Model.TravelPackage.Description</p>
+    <p><strong>Цена на място:</strong> @Model.TravelPackage.Price.ToString("C")</p>
+    <p><strong>Брой места:</strong> @Model.NumberOfSlots</p>
+    <p><strong>Обща сума:</strong> @Model.TotalPrice.ToString("C")</p>
+
+    <hr />
+    <h4>Пътници:</h4>
+    <ul>
+        @foreach (var p in Model.Passengers)
+        {
+            <li>@p.FullName</li>
+        }
+    </ul>
+
+    <p class="text-muted">Това е примерна фактура. Не представлява реален документ за плащане.</p>
+</div>

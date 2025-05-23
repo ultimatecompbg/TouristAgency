@@ -33,7 +33,7 @@
 
             <div class="form-group">
                 <label asp-for="Input.Role"></label>
-                <select asp-for="Input.Role" class="form-control">
+                <select asp-for="Input.Role" class="form-control" id="Input_Role">
                     <option value="User">Потребител</option>
                     <option value="TravelAgency">Туристическа агенция</option>
                 </select>
@@ -66,13 +66,31 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        const roleSelect = document.querySelector('#Input_Role');
-        const agencyFields = document.querySelector('#agencyFields');
+        document.addEventListener("DOMContentLoaded", function () {
+            const roleSelect = document.querySelector('#Input_Role');
+            const agencyFields = document.querySelector('#agencyFields');
 
-        roleSelect.addEventListener('change', () => {
-            agencyFields.style.display = roleSelect.value === 'TravelAgency' ? 'block' : 'none';
+            function toggleAgencyFields() {
+                const isAgency = roleSelect.value === 'TravelAgency';
+                agencyFields.style.display = isAgency ? 'block' : 'none';
+
+                // Дезактивирай/активирай валидация на полетата
+                agencyFields.querySelectorAll('input, textarea').forEach(field => {
+                    if (!isAgency) {
+                        field.setAttribute('data-val', 'false');
+                        field.removeAttribute('data-val-required');
+                    } else {
+                        field.setAttribute('data-val', 'true');
+                        field.setAttribute('data-val-required', 'Това поле е задължително.');
+                    }
+                });
+            }
+
+            if (roleSelect && agencyFields) {
+                roleSelect.addEventListener('change', toggleAgencyFields);
+                toggleAgencyFields();
+            }
         });
-
-        roleSelect.dispatchEvent(new Event('change'));
     </script>
 }
+

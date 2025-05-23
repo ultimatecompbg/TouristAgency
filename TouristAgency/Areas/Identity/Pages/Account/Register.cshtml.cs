@@ -48,13 +48,13 @@ public class RegisterModel : PageModel
         public string Role { get; set; }
 
         [Display(Name = "Телефон")]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [Display(Name = "Адрес")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [Display(Name = "Описание")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 
     public void OnGet(string returnUrl = null)
@@ -65,29 +65,45 @@ public class RegisterModel : PageModel
     public async Task<IActionResult> OnPostAsync(string returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
-        if (ModelState.IsValid)
+
+        // Сървърна валидация само ако е туристическа агенция
+        if (Input.Role == "TravelAgency")
         {
-            var user = new ApplicationUser
-            {
-                UserName = Input.Email,
-                Email = Input.Email,
-                PhoneNumber = Input.PhoneNumber,
-                Address = Input.Address,
-                Description = Input.Description,
-                IsApproved = Input.Role != "TravelAgency"
-            };
+            if (string.IsNullOrWhiteSpace(Input.PhoneNumber))
+                ModelState.AddModelError("Input.PhoneNumber", "Телефонът е задължителен за туристически агенции.");
 
-            var result = await _userManager.CreateAsync(user, Input.Password);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, Input.Role);
-                return RedirectToPage("RegisterConfirmation", new { email = Input.Email });
-            }
+            if (string.IsNullOrWhiteSpace(Input.Address))
+                ModelState.AddModelError("Input.Address", "Адресът е задължителен за туристически агенции.");
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+            if (string.IsNullOrWhiteSpace(Input.Description))
+                ModelState.AddModelError("Input.Description", "Описанието е задължително за туристически агенции.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = Input.Email,
+            Email = Input.Email,
+            PhoneNumber = Input.PhoneNumber,
+            Address = Input.Address,
+            Description = Input.Description,
+            IsApproved = Input.Role != "TravelAgency" // Само потребителите се одобряват автоматично
+        };
+
+        var result = await _userManager.CreateAsync(user, Input.Password);
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(user, Input.Role);
+            return RedirectToPage("RegisterConfirmation", new { email = Input.Email });
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
         }
 
         return Page();
