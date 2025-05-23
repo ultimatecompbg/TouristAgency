@@ -40,19 +40,23 @@
         const slotInput = document.querySelector('input[name="slotCount"]');
         const travelerInputs = document.getElementById('travelerInputs');
 
-        slotInput.addEventListener('input', () => {
+        function updateTravelerInputs() {
             travelerInputs.innerHTML = '';
             const count = parseInt(slotInput.value);
             for (let i = 0; i < count; i++) {
                 const input = document.createElement('input');
-                input.name = 'travelerNames';
+                input.name = `travelerNames[${i}]`; // <== ТУК е важното!
                 input.className = 'form-control mb-2';
                 input.placeholder = `Име на пътник #${i + 1}`;
                 input.required = true;
                 travelerInputs.appendChild(input);
             }
-        });
+        }
+
+        slotInput.addEventListener('input', updateTravelerInputs);
+        updateTravelerInputs(); // при първоначално зареждане
     </script>
+
 }
 else
 {

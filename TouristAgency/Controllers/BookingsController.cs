@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -241,8 +242,13 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFromPackage(int packageId, int slotCount, List<string> travelerNames)
         {
+            Debug.WriteLine("POST CreateFromPackage");
+
             var user = await _userManager.GetUserAsync(User);
-            var package = await _context.TravelPackages.FindAsync(packageId);
+            var package = await _context.TravelPackages
+                .Include(p => p.Destination)
+                .Include(p => p.TourOperator)
+                .FirstOrDefaultAsync(p => p.Id == packageId);
 
             if (package == null || slotCount < 1 || travelerNames.Count != slotCount)
                 return BadRequest();
@@ -264,16 +270,18 @@ namespace TouristAgency.Controllers
                 Passengers = travelerNames.Select(name => new BookingPassenger
                 {
                     FullName = name
-                }).ToList()
+                }).ToList(),
+                TravelPackage = package
             };
 
             package.AvailableSlots -= slotCount;
+            _context.TravelPackages.Update(package);
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            // ✅ Redirect to payment/confirmation page
-            return RedirectToAction("ConfirmBooking", new { id = booking.Id });
+            return View("ConfirmBooking", booking);
         }
+
 
         [HttpPost]
         [Authorize]
