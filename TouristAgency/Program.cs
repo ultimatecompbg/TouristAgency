@@ -10,7 +10,8 @@ var connectionString = builder.Configuration.GetConnectionString("ApplicationDbC
     ?? throw new InvalidOperationException("Connection string 'ApplicationDbContextConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlite(builder.Configuration.GetConnectionString("ApplicationDbContextConnection")));
+
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {

@@ -47,35 +47,42 @@ public class TravelPackagesController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(TravelPackage model)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create(TravelPackage package, List<IFormFile> Images)
+{
+    if (ModelState.IsValid)
     {
-        if (!await IsUserApproved()) return Forbid();
+        _context.TravelPackages.Add(package);
+        await _context.SaveChangesAsync();
 
-        if (ModelState.IsValid)
+        if (Images != null && Images.Any())
         {
-            model.TourOperatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _context.Add(model);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(MyPackages));
-        }
-        else
-        {
-            if (!ModelState.IsValid)
+            foreach (var image in Images)
             {
-                foreach (var entry in ModelState)
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                var path = Path.Combine("wwwroot/images", fileName);
+                using (var stream = new FileStream(path, FileMode.Create))
                 {
-                    foreach (var error in entry.Value.Errors)
-                    {
-                        Debug.WriteLine($"❌ {entry.Key}: {error.ErrorMessage}");
-                    }
+                    await image.CopyToAsync(stream);
                 }
+
+                var img = new TravelPackageImage
+                {
+                    TravelPackageId = package.Id,
+                    ImagePath = "/images/" + fileName
+                };
+                _context.Add(img);
             }
 
+            await _context.SaveChangesAsync();
         }
-        ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name", model.DestinationId);
-        return View(model);
+
+        return RedirectToAction(nameof(Index));
     }
+
+    return View(package);
+}
+
 
     [HttpGet]
     public async Task<IActionResult> Edit(int id)

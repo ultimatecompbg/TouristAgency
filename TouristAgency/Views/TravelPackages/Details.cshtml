@@ -11,6 +11,11 @@
 <p><strong>Период:</strong> @Model.StartDate.ToShortDateString() – @Model.EndDate.ToShortDateString()</p>
 <p><strong>Свободни места:</strong> @Model.AvailableSlots</p>
 <p><strong>Организатор:</strong> @Model.TourOperator?.Email</p>
+@foreach (var img in Model.Images)
+{
+    <img src="@img.ImagePath" class="img-thumbnail" style="max-height: 200px;" />
+}
+
 
 <hr />
 

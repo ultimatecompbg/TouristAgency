@@ -20,6 +20,16 @@ namespace TouristAgency.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            if (Database.IsSqlite())
+            {
+                builder.Entity<ApplicationUser>(entity =>
+                {
+                    entity.Property(e => e.ConcurrencyStamp)
+                          .HasColumnType("TEXT")
+                          .HasMaxLength(256);
+                });
+
+            }
 
             builder.Entity<Booking>()
                 .HasOne(b => b.TravelPackage)

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using System.ComponentModel.DataAnnotations.Schema;
 namespace TouristAgency.Models
 {
     public class TravelPackage
@@ -29,12 +29,17 @@ namespace TouristAgency.Models
         [Required]
         public int DestinationId { get; set; }
 
-        public Destination? Destination { get; set; }  
+        public Destination? Destination { get; set; }
+        public string? ImagePath { get; set; }
 
         public string? TourOperatorId { get; set; }
 
-        public ApplicationUser? TourOperator { get; set; } 
+        public ApplicationUser? TourOperator { get; set; }
 
         public ICollection<Booking>? Bookings { get; set; }
+        [NotMapped]
+        public IFormFile ImageFile { get; set; }
+        public ICollection<TravelPackageImage> Images { get; set; }
+
     }
 }

@@ -81,29 +81,49 @@ public class AdminController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateDestination(Destination destination)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> CreateDestination(Destination destination)
+{
+    Debug.WriteLine($"Получена дестинация: {destination.Name}, lat: {destination.Latitude}, lng: {destination.Longitude}");
+
+    if (ModelState.IsValid)
     {
-        Debug.WriteLine($"Получена дестинация: {destination.Name}, lat: {destination.Latitude}, lng: {destination.Longitude}");
-        if (ModelState.IsValid)
-        {
-            _context.Add(destination);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Destinations));
-        }
-        else
-        {
-            foreach (var entry in ModelState)
+            // ✅ Handle image upload
+            if (destination.ImageFile != null && destination.ImageFile.Length > 0)
             {
-                foreach (var error in entry.Value.Errors)
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(destination.ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    Debug.WriteLine($"ГРЕШКА при '{entry.Key}': {error.ErrorMessage}");
+                    await destination.ImageFile.CopyToAsync(stream);
                 }
-            }
+
+                destination.ImagePath = "/images/" + uniqueFileName;
+                Debug.WriteLine("Posting!");
         }
 
-        return View(destination);
+        _context.Add(destination);
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Destinations));
     }
+    else
+    {
+        foreach (var entry in ModelState)
+        {
+            foreach (var error in entry.Value.Errors)
+            {
+                Debug.WriteLine($"ГРЕШКА при '{entry.Key}': {error.ErrorMessage}");
+            }
+        }
+    }
+
+    return View(destination);
+}
+
 
     [HttpGet]
     public async Task<IActionResult> EditDestination(int id)
