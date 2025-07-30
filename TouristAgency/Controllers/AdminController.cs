@@ -79,73 +79,126 @@ public class AdminController : Controller
     {
         return View();
     }
-
     [HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> CreateDestination(Destination destination)
-{
-    Debug.WriteLine($"Получена дестинация: {destination.Name}, lat: {destination.Latitude}, lng: {destination.Longitude}");
-
-    if (ModelState.IsValid)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateDestination(Destination destination)
     {
-            // ✅ Handle image upload
-            if (destination.ImageFile != null && destination.ImageFile.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(destination.ImageFile.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await destination.ImageFile.CopyToAsync(stream);
-                }
-
-                destination.ImagePath = "/images/" + uniqueFileName;
-                Debug.WriteLine("Posting!");
-        }
+        if (!ModelState.IsValid)
+            return View(destination);
 
         _context.Add(destination);
         await _context.SaveChangesAsync();
+
+        if (destination.ImageFiles != null && destination.ImageFiles.Count > 0)
+        {
+            var uploadDir = Path.Combine("wwwroot", "uploads", "destinations");
+            if (!Directory.Exists(uploadDir))
+                Directory.CreateDirectory(uploadDir);
+
+            foreach (var file in destination.ImageFiles)
+            {
+                var uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadDir, uniqueName);
+
+                using (var fs = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fs);
+                }
+
+                _context.DestinationImages.Add(new DestinationImage
+                {
+                    DestinationId = destination.Id,
+                    FileName = uniqueName
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         return RedirectToAction(nameof(Destinations));
     }
-    else
-    {
-        foreach (var entry in ModelState)
-        {
-            foreach (var error in entry.Value.Errors)
-            {
-                Debug.WriteLine($"ГРЕШКА при '{entry.Key}': {error.ErrorMessage}");
-            }
-        }
-    }
 
-    return View(destination);
-}
+
 
 
     [HttpGet]
     public async Task<IActionResult> EditDestination(int id)
     {
-        var destination = await _context.Destinations.FindAsync(id);
+        var destination = await _context.Destinations
+            .Include(d => d.Images)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
         if (destination == null) return NotFound();
+
         return View(destination);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditDestination(int id, Destination destination)
+    public async Task<IActionResult> EditDestination(int id, Destination destination, List<IFormFile> NewImages, List<int> DeleteImageIds)
     {
-        if (id != destination.Id) return NotFound();
-        if (ModelState.IsValid)
+        if (id != destination.Id)
+            return NotFound();
+
+        var existingDestination = await _context.Destinations
+            .Include(d => d.Images)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
+        if (existingDestination == null)
+            return NotFound();
+
+        // Update fields
+        existingDestination.Name = destination.Name;
+        existingDestination.Description = destination.Description;
+        existingDestination.Latitude = destination.Latitude;
+        existingDestination.Longitude = destination.Longitude;
+
+        // Delete selected images
+        if (DeleteImageIds != null)
         {
-            _context.Update(destination);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Destinations));
+            foreach (var imageId in DeleteImageIds)
+            {
+                var image = await _context.DestinationImages.FindAsync(imageId);
+                if (image != null)
+                {
+                    var filePath = Path.Combine("wwwroot", "uploads", "destinations", image.FileName);
+                    if (System.IO.File.Exists(filePath))
+                        System.IO.File.Delete(filePath);
+
+                    _context.DestinationImages.Remove(image);
+                }
+            }
         }
-        return View(destination);
+
+        // Add new images
+        if (NewImages != null && NewImages.Count > 0)
+        {
+            var uploadDir = Path.Combine("wwwroot", "uploads", "destinations");
+            if (!Directory.Exists(uploadDir))
+                Directory.CreateDirectory(uploadDir);
+
+            foreach (var file in NewImages)
+            {
+                var uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadDir, uniqueName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                _context.DestinationImages.Add(new DestinationImage
+                {
+                    DestinationId = destination.Id,
+                    FileName = uniqueName
+                });
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Destinations));
     }
+
 
     [HttpGet]
     public async Task<IActionResult> DeleteDestination(int id)
@@ -153,7 +206,23 @@ public async Task<IActionResult> CreateDestination(Destination destination)
         var destination = await _context.Destinations.FindAsync(id);
         if (destination == null) return NotFound();
         return View(destination);   
-    }  
+    }
+    [HttpPost]
+    public async Task<IActionResult> DeleteImage(int imageId)
+    {
+        var image = await _context.DestinationImages.FindAsync(imageId);
+        if (image != null)
+        {
+            var filePath = Path.Combine("wwwroot", "uploads", "destinations", image.FileName);
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+
+            _context.DestinationImages.Remove(image);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction("EditDestination", new { id = image?.DestinationId });
+    }
 
     [HttpPost, ActionName("DeleteDestination")]
     [ValidateAntiForgeryToken]

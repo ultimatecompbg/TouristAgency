@@ -37,6 +37,7 @@ public class PublicController : Controller
     public async Task<IActionResult> Destination(int id)
     {
         var destination = await _context.Destinations
+            .Include(d => d.Images)
             .Include(d => d.TravelPackages)
             .FirstOrDefaultAsync(d => d.Id == id);
 

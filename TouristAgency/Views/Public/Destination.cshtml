@@ -1,15 +1,31 @@
 ﻿@model TouristAgency.Models.Destination
+
 @{
     ViewData["Title"] = "Дестинация: " + Model.Name;
 }
 
 <h2>@Model.Name</h2>
-<p><strong>Описание:</strong> @Model.Description</p>
-<p><strong>Сезон:</strong> @Model.Season</p>
-@if (!string.IsNullOrEmpty(Model.ImagePath))
+
+@if (Model.Images != null && Model.Images.Any())
 {
-    <img src="@Model.ImagePath" alt="Image" class="img-thumbnail" />
+    <div class="mb-3 d-flex flex-wrap">
+        @foreach (var image in Model.Images)
+        {
+            <img src="@Url.Content($"~/uploads/destinations/{image.FileName}")"
+                 alt="Image"
+                 class="img-thumbnail me-2 mb-2"
+                 style="max-height: 200px;" />
+        }
+    </div>
 }
+else
+{
+    <p class="text-muted">Няма налични снимки за тази дестинация.</p>
+}
+
+<p><strong>Описание:</strong> @Model.Description</p>
+
+
 <div id="map" style="height: 400px;" class="mb-4"></div>
 
 <h4>Налични туристически пакети:</h4>

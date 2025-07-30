@@ -3,31 +3,37 @@
     ViewData["Title"] = "Начало";
 }
 
-<div class="text-center">
+<div class="text-center py-5 bg-primary text-white">
     <h1 class="display-4">Добре дошли във Vix Travel!</h1>
     <p class="lead">Изследвайте нови хоризонти с непопулярни, но удивителни дестинации.</p>
 </div>
 
-@if (!Model.Any())
-{
-    <p class="text-muted text-center">В момента няма налични оферти.</p>
-}
-else
-{
-    <div class="row mt-4">
-        @foreach (var item in Model)
-        {
-            <div class="col-md-4">
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Title</h5>
-                        <p class="card-text">@item.Description?.Substring(0, Math.Min(item.Description.Length, 100))...</p>
-                        <p><strong>Дестинация:</strong> @item.Destination?.Name</p>
-                        <p><strong>Цена:</strong> @item.Price.ToString("F2") лв.</p>
-                        <a href="/TravelPackages/Details/@item.Id" class="btn btn-outline-primary">Виж повече</a>
+<div class="container mt-5">
+    @if (!Model.Any())
+    {
+        <p class="text-muted text-center">В момента няма налични оферти.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm border-0">
+                        @if (item.Images != null && item.Images.Any())
+                        {
+                            <img src="~/uploads/@item.Images.First().FileName" class="card-img-top" alt="Снимка" />
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                            <p class="card-text text-muted">@item.Description?.Substring(0, Math.Min(item.Description.Length, 100))...</p>
+                            <p><strong>Дестинация:</strong> @item.Destination?.Name</p>
+                            <p><strong>Цена:</strong> @item.Price.ToString("F2") лв.</p>
+                            <a href="/TravelPackages/Details/@item.Id" class="btn btn-outline-primary w-100">Виж повече</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-}
+            }
+        </div>
+    }
+</div>

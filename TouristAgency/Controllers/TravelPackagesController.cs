@@ -38,40 +38,50 @@ public class TravelPackagesController : Controller
         return View(packages);
     }
 
-    public async Task<IActionResult> Create()
+    [HttpGet]
+    public IActionResult Create()
     {
-        if (!await IsUserApproved()) return Forbid();
-
-        ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name");
+        ViewBag.Destinations = new SelectList(_context.Destinations, "Id", "Name");
         return View();
     }
-
     [HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Create(TravelPackage package, List<IFormFile> Images)
-{
-    if (ModelState.IsValid)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(TravelPackage package, List<IFormFile> ImageFiles)
     {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Destinations = new SelectList(_context.Destinations, "Id", "Name", package.DestinationId);
+            return View(package);
+        }
+
+        // Запази пакета
         _context.TravelPackages.Add(package);
         await _context.SaveChangesAsync();
 
-        if (Images != null && Images.Any())
+        // Запази снимките
+        if (ImageFiles != null && ImageFiles.Count > 0)
         {
-            foreach (var image in Images)
+            var uploadDir = Path.Combine("wwwroot", "uploads", "packages");
+            if (!Directory.Exists(uploadDir))
+                Directory.CreateDirectory(uploadDir);
+
+            foreach (var file in ImageFiles)
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                var path = Path.Combine("wwwroot/images", fileName);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var path = Path.Combine(uploadDir, fileName);
+
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
-                    await image.CopyToAsync(stream);
+                    await file.CopyToAsync(stream);
                 }
 
-                var img = new TravelPackageImage
+                var travelImage = new TravelPackageImage
                 {
                     TravelPackageId = package.Id,
-                    ImagePath = "/images/" + fileName
+                    FileName = fileName
                 };
-                _context.Add(img);
+
+                _context.TravelPackageImages.Add(travelImage);
             }
 
             await _context.SaveChangesAsync();
@@ -80,62 +90,8 @@ public async Task<IActionResult> Create(TravelPackage package, List<IFormFile> I
         return RedirectToAction(nameof(Index));
     }
 
-    return View(package);
-}
 
 
-    [HttpGet]
-    public async Task<IActionResult> Edit(int id)
-    {
-        if (!await IsUserApproved()) return Forbid();
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var package = await _context.TravelPackages.FindAsync(id);
-        if (package == null || package.TourOperatorId != userId)
-        {
-            return NotFound();
-        }
-        ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name", package.DestinationId);
-        return View(package);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, TravelPackage model)
-    {
-        if (!await IsUserApproved()) return Forbid();
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var original = await _context.TravelPackages.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
-
-        if (original == null || original.TourOperatorId != userId)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            model.TourOperatorId = userId;
-            _context.Update(model);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(MyPackages));
-        }
-        else {
-            if (!ModelState.IsValid)
-            {
-                foreach (var entry in ModelState)
-                {
-                    foreach (var error in entry.Value.Errors)
-                    {
-                        Debug.WriteLine($"❌ {entry.Key}: {error.ErrorMessage}");
-                    }
-                }
-            }
-
-        }
-        ViewData["Destinations"] = new SelectList(_context.Destinations, "Id", "Name", model.DestinationId);
-        return View(model);
-    }
 
     [HttpGet]
     public async Task<IActionResult> Delete(int id)

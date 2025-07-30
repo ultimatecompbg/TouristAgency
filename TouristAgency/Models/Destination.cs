@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-namespace TouristAgency.Models
 
+namespace TouristAgency.Models
 {
     public class Destination
     {
@@ -12,14 +12,15 @@ namespace TouristAgency.Models
         public string? Season { get; set; }
         public string? FunFacts { get; set; }
         public string? History { get; set; }
-        public string? ImagePath { get; set; }
 
         public int? CategoryId { get; set; }
         public Category? Category { get; set; }
 
         public ICollection<TravelPackage>? TravelPackages { get; set; }
-        [NotMapped]
-        public IFormFile ImageFile { get; set; }
-    }
 
+        public ICollection<DestinationImage>? Images { get; set; }
+
+        [NotMapped]
+        public List<IFormFile>? ImageFiles { get; set; } 
+    }
 }

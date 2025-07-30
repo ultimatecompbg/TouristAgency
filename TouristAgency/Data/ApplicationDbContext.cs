@@ -47,5 +47,10 @@ namespace TouristAgency.Data
         public DbSet<TravelPackage> TravelPackages { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingPassenger> BookingPassengers { get; set; }
+        public DbSet<DestinationImage> DestinationImages { get; set; }
+        public DbSet<TravelPackageImage> TravelPackageImages { get; set; }
+
+
+        
     }
 }

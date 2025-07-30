@@ -38,7 +38,7 @@ namespace TouristAgency.Models
 
         public ICollection<Booking>? Bookings { get; set; }
         [NotMapped]
-        public IFormFile ImageFile { get; set; }
+        public List<IFormFile> ImageFiles { get; set; }
         public ICollection<TravelPackageImage> Images { get; set; }
 
     }

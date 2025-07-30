@@ -5,17 +5,32 @@
 }
 
 <h2>@Model.Title</h2>
+
 <p><strong>Описание:</strong> @Model.Description</p>
-<p><strong>Цена:</strong> @string.Format("{0:C}", Model.Price)</p>
+<p><strong>Цена:</strong> @Model.Price.ToString("F2") лв.</p>
 <p><strong>Дестинация:</strong> @Model.Destination?.Name</p>
 <p><strong>Период:</strong> @Model.StartDate.ToShortDateString() – @Model.EndDate.ToShortDateString()</p>
 <p><strong>Свободни места:</strong> @Model.AvailableSlots</p>
 <p><strong>Организатор:</strong> @Model.TourOperator?.Email</p>
-@foreach (var img in Model.Images)
-{
-    <img src="@img.ImagePath" class="img-thumbnail" style="max-height: 200px;" />
-}
 
+@if (Model.Images != null && Model.Images.Any())
+{
+    <div class="row mb-3">
+        @foreach (var img in Model.Images)
+        {
+            <div class="col-md-4">
+                <img src="~/uploads/@img.FileName"
+                     alt="Пакетна снимка"
+                     class="img-thumbnail mb-2"
+                     style="max-height: 200px;" />
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">Няма изображения.</p>
+}
 
 <hr />
 
@@ -50,7 +65,7 @@
             const count = parseInt(slotInput.value);
             for (let i = 0; i < count; i++) {
                 const input = document.createElement('input');
-                input.name = `travelerNames[${i}]`; // <== ТУК е важното!
+                input.name = `travelerNames[${i}]`;
                 input.className = 'form-control mb-2';
                 input.placeholder = `Име на пътник #${i + 1}`;
                 input.required = true;
@@ -61,7 +76,6 @@
         slotInput.addEventListener('input', updateTravelerInputs);
         updateTravelerInputs(); // при първоначално зареждане
     </script>
-
 }
 else
 {
