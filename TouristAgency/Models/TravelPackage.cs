@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace TouristAgency.Models
 {
-    public class TravelPackage
+    public class TravelPackage : IValidatableObject
     {
         public int Id { get; set; }
 
@@ -40,6 +40,18 @@ namespace TouristAgency.Models
         [NotMapped]
         public List<IFormFile> ImageFiles { get; set; }
         public ICollection<TravelPackageImage> Images { get; set; }
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (StartDate.Date < DateTime.Today)
+            {
+                yield return new ValidationResult("Началната дата не може да е в миналото.", new[] { nameof(StartDate) });
+            }
+
+            if (EndDate.Date < StartDate.Date)
+            {
+                yield return new ValidationResult("Крайната дата не може да е преди началната.", new[] { nameof(EndDate) });
+            }
+        }
 
     }
 }

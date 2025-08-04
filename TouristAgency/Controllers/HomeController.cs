@@ -17,6 +17,7 @@ namespace TouristAgency.Controllers
         {
             var packages = await _context.TravelPackages
                 .Include(p => p.Destination)
+                .Include(p => p.Images)
                 .OrderByDescending(p => p.Id)
                 .Take(3)
                 .ToListAsync();

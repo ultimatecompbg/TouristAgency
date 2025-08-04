@@ -55,4 +55,21 @@
 
 @section Scripts {
         <partial name="_ValidationScriptsPartial" />
+    <script>
+        const startInput = document.getElementById("StartDate");
+        const endInput = document.getElementById("EndDate");
+
+        function validateDates() {
+            const startDate = new Date(startInput.value);
+            const endDate = new Date(endInput.value);
+            if (endDate < startDate) {
+                endInput.setCustomValidity("Крайната дата не може да е преди началната.");
+            } else {
+                endInput.setCustomValidity("");
+            }
+        }
+
+        startInput.addEventListener("change", validateDates);
+        endInput.addEventListener("change", validateDates);
+    </script>
 }

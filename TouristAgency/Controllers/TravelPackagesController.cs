@@ -45,53 +45,126 @@ public class TravelPackagesController : Controller
         return View();
     }
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(TravelPackage package, List<IFormFile> ImageFiles)
-    {
-        if (!ModelState.IsValid)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create(TravelPackage package)
+{
+    
+    ModelState.Remove("Images");
+    if (!ModelState.IsValid)
         {
             ViewBag.Destinations = new SelectList(_context.Destinations, "Id", "Name", package.DestinationId);
             return View(package);
         }
+    package.TourOperatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);    
+    _context.TravelPackages.Add(package);
+    await _context.SaveChangesAsync();
 
-        // Запази пакета
-        _context.TravelPackages.Add(package);
+    if (package.ImageFiles != null && package.ImageFiles.Any())
+    {
+        var uploadDir = Path.Combine("wwwroot", "uploads", "packages");
+        if (!Directory.Exists(uploadDir))
+            Directory.CreateDirectory(uploadDir);
+
+        foreach (var file in package.ImageFiles)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(uploadDir, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            _context.TravelPackageImages.Add(new TravelPackageImage
+            {
+                TravelPackageId = package.Id,
+                ImagePath = fileName
+            });
+        }
+
         await _context.SaveChangesAsync();
+    }
 
-        // Запази снимките
-        if (ImageFiles != null && ImageFiles.Count > 0)
+    return RedirectToAction(nameof(MyPackages));
+}
+
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var package = await _context.TravelPackages
+            .Include(p => p.Images)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (package == null) return NotFound();
+
+        ViewBag.Destinations = new SelectList(_context.Destinations, "Id", "Name", package.DestinationId);
+        return View(package);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, TravelPackage package, List<IFormFile> NewImages, List<int> DeleteImageIds)
+    {
+        if (id != package.Id) return NotFound();
+
+        var existingPackage = await _context.TravelPackages
+            .Include(p => p.Images)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (existingPackage == null) return NotFound();
+
+        existingPackage.Title = package.Title;
+        existingPackage.Description = package.Description;
+        existingPackage.Price = package.Price;
+        existingPackage.StartDate = package.StartDate;
+        existingPackage.EndDate = package.EndDate;
+        existingPackage.AvailableSlots = package.AvailableSlots;
+        existingPackage.DestinationId = package.DestinationId;
+
+        if (DeleteImageIds != null)
+        {
+            foreach (var imageId in DeleteImageIds)
+            {
+                var image = await _context.TravelPackageImages.FindAsync(imageId);
+                if (image != null)
+                {
+                    var filePath = Path.Combine("wwwroot", "uploads", "packages", image.ImagePath);
+                    if (System.IO.File.Exists(filePath))
+                        System.IO.File.Delete(filePath);
+
+                    _context.TravelPackageImages.Remove(image);
+                }
+            }
+        }
+
+        if (NewImages != null && NewImages.Count > 0)
         {
             var uploadDir = Path.Combine("wwwroot", "uploads", "packages");
             if (!Directory.Exists(uploadDir))
                 Directory.CreateDirectory(uploadDir);
 
-            foreach (var file in ImageFiles)
+            foreach (var file in NewImages)
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var path = Path.Combine(uploadDir, fileName);
+                var uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadDir, uniqueName);
 
-                using (var stream = new FileStream(path, FileMode.Create))
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                var travelImage = new TravelPackageImage
+                _context.TravelPackageImages.Add(new TravelPackageImage
                 {
                     TravelPackageId = package.Id,
-                    FileName = fileName
-                };
-
-                _context.TravelPackageImages.Add(travelImage);
+                    ImagePath = uniqueName
+                });
             }
-
-            await _context.SaveChangesAsync();
         }
 
-        return RedirectToAction(nameof(Index));
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(MyPackages));
     }
-
-
-
 
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
@@ -140,6 +213,7 @@ public class TravelPackagesController : Controller
         var package = await _context.TravelPackages
             .Include(p => p.Destination)
             .Include(p => p.TourOperator)
+            .Include(p => p.Images)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (package == null)
@@ -147,6 +221,4 @@ public class TravelPackagesController : Controller
 
         return View(package);
     }
-
-
 }

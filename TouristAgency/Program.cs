@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TouristAgency.Data;
+using TouristAgency;
 using TouristAgency.Models;
 using System.Globalization;
 
@@ -49,6 +50,7 @@ async Task CreateRolesAsync(IServiceProvider serviceProvider)
 using (var scope = app.Services.CreateScope())
 {
     await CreateRolesAsync(scope.ServiceProvider);
+    
 }
 
 if (!app.Environment.IsDevelopment())
@@ -73,4 +75,5 @@ var cultureInfo = new CultureInfo("en-GB");
 cultureInfo.NumberFormat.CurrencySymbol = "лв.";
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+await SeedData.InitializeAsync(app.Services);
 app.Run();

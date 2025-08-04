@@ -22,7 +22,7 @@
                     <div class="card mb-4 shadow-sm border-0">
                         @if (item.Images != null && item.Images.Any())
                         {
-                            <img src="~/uploads/@item.Images.First().FileName" class="card-img-top" alt="Снимка" />
+                            <img src="@Url.Content($"~/uploads/packages/{item.Images.First().ImagePath}")" style="height: 160px; width: 100%;" class="card-img-top object-fit-cover" alt="Снимка" />
                         }
                         <div class="card-body">
                             <h5 class="card-title">@item.Title</h5>
