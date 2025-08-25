@@ -10,37 +10,37 @@
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Title"></label>
+        <label asp-for="Title">Заглавие</label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Description"></label>
+        <label asp-for="Description">Описание</label>
         <textarea asp-for="Description" class="form-control"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Price"></label>
+        <label asp-for="Price">Цена</label>
         <input asp-for="Price" class="form-control" />
         <span asp-validation-for="Price" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="AvailableSlots"></label>
+        <label asp-for="AvailableSlots">Налични места</label>
         <input asp-for="AvailableSlots" class="form-control" />
         <span asp-validation-for="AvailableSlots" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="StartDate"></label>
+        <label asp-for="StartDate">Начална дата</label>
         <input asp-for="StartDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="StartDate" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="EndDate"></label>
+        <label asp-for="EndDate">Крайна дата</label>
         <input asp-for="EndDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="EndDate" class="text-danger"></span>
     </div>

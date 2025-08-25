@@ -3,16 +3,16 @@
     ViewData["Title"] = "Резервации за моите пакети";
 }
 
-<h2>Резервации за моите пакети</h2>
+<h2 class="mb-4">Резервации за моите пакети</h2>
 
-@if (!Model.Any())
+@if (Model == null || !Model.Any())
 {
-    <p>Нямате направени резервации все още.</p>
+    <p class="text-muted">Нямате направени резервации все още.</p>
 }
 else
 {
-    <table class="table">
-        <thead>
+    <table class="table table-striped align-middle">
+        <thead class="table-light">
             <tr>
                 <th>Пакет</th>
                 <th>Дестинация</th>
@@ -21,30 +21,67 @@ else
                 <th>Обща цена</th>
                 <th>Статус</th>
                 <th>Дата</th>
-                <th>Пътници</th>
+                <th class="text-end">Пътници</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var b in Model)
-            {
-                <tr>
-                    <td>@b.TravelPackage?.Title</td>
-                    <td>@b.TravelPackage?.Destination?.Name</td>
-                    <td>@b.User?.Email</td>
-                    <td>@b.NumberOfSlots</td>
-                    <td>@b.TotalPrice.ToString("C")</td>
-                    <td>@b.Status</td>
-                    <td>@b.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                    <td>
-                        <ul>
-                            @foreach (var p in b.Passengers)
+        @foreach (var b in Model)
+        {
+            var paxCount = b.Passengers?.Count ?? 0;
+            var collapseId = $"pax-{b.Id}";
+            <tr>
+                <td>@b.TravelPackage?.Title</td>
+                <td>@b.TravelPackage?.Destination?.Name</td>
+                <td>@b.User?.Email</td>
+                <td>@b.NumberOfSlots</td>
+                <td>@b.TotalPrice.ToString("C")</td>
+                <td>@b.Status</td>
+                <td>@b.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                <td class="text-end">
+                    @if (paxCount > 0)
+                    {
+                        <button class="btn btn-sm btn-outline-primary"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#@collapseId"
+                                aria-expanded="false"
+                                aria-controls="@collapseId">
+                            Виж пътниците <span class="badge text-bg-primary ms-1">@paxCount</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Няма</span>
+                    }
+                </td>
+            </tr>
+            <tr class="border-0">
+                <td colspan="8" class="p-0 border-0">
+                    <div id="@collapseId" class="collapse">
+                        <div class="p-3 border-top">
+                            @if (paxCount > 0)
                             {
-                                <li>@p.FullName</li>
+                                <ul class="mb-0">
+                                    @foreach (var p in b.Passengers)
+                                    {
+                                        <li>@p.FullName</li>
+                                    }
+                                </ul>
                             }
-                        </ul>
-                    </td>
-                </tr>
-            }
+                            else
+                            {
+                                <span class="text-muted">Няма записани пътници.</span>
+                            }
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
         </tbody>
     </table>
+}
+
+@section Scripts {
+    <!-- Уверете се, че Bootstrap JS bundle е включен в _Layout.cshtml -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
 }

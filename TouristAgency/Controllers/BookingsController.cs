@@ -45,6 +45,8 @@ namespace TouristAgency.Controllers
                     .ThenInclude(p => p.Destination)
                 .Include(b => b.TravelPackage)
                     .ThenInclude(p => p.TourOperator)
+                .Include(b => b.TravelPackage)
+                    .ThenInclude(p => p.Images) 
                 .Include(b => b.Passengers)
                 .Include(b => b.User)
                 .FirstOrDefaultAsync(b => b.Id == id);

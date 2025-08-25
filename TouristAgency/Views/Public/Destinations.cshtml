@@ -4,13 +4,43 @@
     ViewData["Title"] = "Всички дестинации";
 }
 
-<h2>Всички дестинации</h2>
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Всички дестинации</h2>
 
-<ul class="list-group">
-    @foreach (var dest in Model)
+    @if (!Model.Any())
     {
-        <li class="list-group-item">
-            <a asp-action="Destination" asp-route-id="@dest.Id">@dest.Name</a>
-        </li>
+        <p class="text-muted text-center">В момента няма налични дестинации.</p>
     }
-</ul>
+    else
+    {
+        <div class="row">
+            @foreach (var dest in Model)
+            {
+                var firstImage = dest.Images != null && dest.Images.Any()
+                    ? dest.Images.First().FileName
+                    : null;
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm border-0">
+                        @if (dest.Images != null && dest.Images.Any())
+                        {
+                            <img src="@Url.Content($"~/uploads/destinations/{firstImage}")"
+                                 style="height: 200px; width: 100%;"
+                                 class="card-img-top object-fit-cover"
+                                 alt="@dest.Name" />
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@dest.Name</h5>
+                            <p class="card-text text-muted">
+                                @dest.Description?.Substring(0, Math.Min(dest.Description.Length, 120))...
+                            </p>
+                            <a asp-action="Destination" asp-route-id="@dest.Id"
+                               class="btn btn-outline-primary w-100">
+                                Виж повече
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

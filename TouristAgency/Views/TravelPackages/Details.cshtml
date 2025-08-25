@@ -2,78 +2,157 @@
 
 @{
     ViewData["Title"] = "Детайли за туристически пакет";
+    var firstImg = Model?.Images != null && Model.Images.Any()
+        ? Url.Content($"~/uploads/packages/{Model.Images.First().ImagePath}")
+        : null;
 }
 
-<h2>@Model.Title</h2>
+<div class="container py-4">
+    <div class="row g-4 align-items-stretch">
 
-<p><strong>Описание:</strong> @Model.Description</p>
-<p><strong>Цена:</strong> @Model.Price.ToString("F2") лв.</p>
-<p><strong>Дестинация:</strong> @Model.Destination?.Name</p>
-<p><strong>Период:</strong> @Model.StartDate.ToShortDateString() – @Model.EndDate.ToShortDateString()</p>
-<p><strong>Свободни места:</strong> @Model.AvailableSlots</p>
-<p><strong>Организатор:</strong> @Model.TourOperator?.Email</p>
+        <div class="col-md-5 d-flex">
+            <div class="w-100 d-flex flex-column">
+                <div class="ratio ratio-16x9 rounded overflow-hidden border">
+                    @if (!string.IsNullOrEmpty(firstImg))
+                    {
+                        <img src="@firstImg" alt="Снимка на пакета" class="w-100 h-100" style="object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light text-muted">
+                            Няма изображение
+                        </div>
+                    }
+                </div>
 
-@if (Model.Images != null && Model.Images.Any())
-{
-    foreach (var img in Model.Images)
-    {
-        <img src="@Url.Content($"~/uploads/packages/{img.ImagePath}")" class="img-thumbnail me-2 mb-2" style="max-height: 200px;" />
-    }
-}
-else
-{
-    <p>Няма изображения.</p>
-}
-
-
-<hr />
-
-@if (User.IsInRole("User"))
-{
-    <h4>Резервирай</h4>
-
-    <form asp-controller="Bookings" asp-action="CreateFromPackage" method="post">
-        <input type="hidden" name="packageId" value="@Model.Id" />
-
-        <div class="form-group">
-            <label>Брой места:</label>
-            <input type="number" name="slotCount" class="form-control" value="1" min="1" max="@Model.AvailableSlots" required />
-        </div>
-
-        <div class="form-group mt-2">
-            <label>Имена на пътниците:</label>
-            <div id="travelerInputs">
-                <input type="text" name="travelerNames" class="form-control mb-2" placeholder="Име на пътник" required />
+                @* Thumbnails *@
+                @if (Model?.Images != null && Model.Images.Count > 1)
+                {
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                        @foreach (var img in Model.Images.Skip(1))
+                        {
+                            var thumb = Url.Content($"~/uploads/packages/{img.ImagePath}");
+                            <img src="@thumb"
+                                 alt="Изображение"
+                                 class="rounded border"
+                                 style="width:95px;height:64px;object-fit:cover;" />
+                        }
+                    </div>
+                }
             </div>
         </div>
 
-        <button type="submit" class="btn btn-success mt-3">Резервирай</button>
-    </form>
+        <div class="col-md-1 d-none d-md-flex px-0 justify-content-center">
+            <div class="vr bg-dark" style="width:3px; min-height:100%;"></div>
+        </div>
 
-    <script>
-        const slotInput = document.querySelector('input[name="slotCount"]');
-        const travelerInputs = document.getElementById('travelerInputs');
+        <div class="col-md-6 d-flex">
+            <div class="card shadow-sm border-0 flex-fill">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <h2 class="h4 mb-2">@Model.Title</h2>
+                        <span class="badge bg-success fs-6">@Model.Price.ToString("F2") лв.</span>
+                    </div>
 
-        function updateTravelerInputs() {
-            travelerInputs.innerHTML = '';
-            const count = parseInt(slotInput.value);
-            for (let i = 0; i < count; i++) {
-                const input = document.createElement('input');
-                input.name = `travelerNames[${i}]`;
-                input.className = 'form-control mb-2';
-                input.placeholder = `Име на пътник #${i + 1}`;
-                input.required = true;
-                travelerInputs.appendChild(input);
-            }
-        }
+                    <p class="text-muted mb-3">@Model.Description</p>
 
-        slotInput.addEventListener('input', updateTravelerInputs);
-        updateTravelerInputs(); // при първоначално зареждане
-    </script>
-}
-else
-{
-    <p class="text-muted">Само потребители могат да правят резервации.</p>
-}
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <div class="small text-uppercase text-secondary">Дестинация</div>
+                            <div class="fw-semibold">@Model.Destination?.Name</div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="small text-uppercase text-secondary">Период</div>
+                            <div class="fw-semibold">
+                                @Model.StartDate.ToShortDateString() – @Model.EndDate.ToShortDateString()
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="small text-uppercase text-secondary">Свободни места</div>
+                            <div class="fw-semibold">@Model.AvailableSlots</div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="small text-uppercase text-secondary">Организатор</div>
+                            <div class="fw-semibold">
+                                @if (Model.TourOperator != null)
+                                {
+                                    <a asp-controller="Public" asp-action="Agency" asp-route-id="@Model.TourOperator.Id" class="text-decoration-none">
+                                        @Model.TourOperator.Email
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Няма организатор</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
 
-<a asp-controller="Public" asp-action="Destinations" class="btn btn-secondary mt-3">Назад</a>
+                    <hr class="my-3" />
+
+                    @if (User.IsInRole("User"))
+                    {
+                        <h5 class="mb-3">Резервирай</h5>
+                        <form asp-controller="Bookings" asp-action="CreateFromPackage" method="post" class="mt-auto">
+                            <input type="hidden" name="packageId" value="@Model.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Брой места</label>
+                                <input type="number"
+                                       name="slotCount"
+                                       class="form-control"
+                                       value="1"
+                                       min="1"
+                                       max="@Model.AvailableSlots"
+                                       required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Имена на пътниците</label>
+                                <div id="travelerInputs">
+                                    <input type="text" name="travelerNames[0]" class="form-control mb-2" placeholder="Име на пътник #1" required />
+                                </div>
+                                <div class="form-text">Добавя се едно поле за всяко място.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Резервирай</button>
+                        </form>
+
+                        <script>
+                            (function () {
+                                const slotInput = document.querySelector('input[name="slotCount"]');
+                                const travelerInputs = document.getElementById('travelerInputs');
+
+                                function updateTravelerInputs() {
+                                    travelerInputs.innerHTML = '';
+                                    const count = Math.max(1, parseInt(slotInput.value || '1', 10));
+                                    for (let i = 0; i < count; i++) {
+                                        const input = document.createElement('input');
+                                        input.name = `travelerNames[${i}]`;
+                                        input.className = 'form-control mb-2';
+                                        input.placeholder = `Име на пътник #${i + 1}`;
+                                        input.required = true;
+                                        travelerInputs.appendChild(input);
+                                    }
+                                }
+
+                                slotInput.addEventListener('input', updateTravelerInputs);
+                                updateTravelerInputs();
+                            })();
+                        </script>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mt-2 mb-0">
+                            Само потребители могат да правят резервации. Моля, влезте в акаунта си.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Public" asp-action="Destinations" class="btn btn-outline-secondary">Назад</a>
+    </div>
+</div>

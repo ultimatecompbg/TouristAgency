@@ -25,25 +25,55 @@ else
 
 <p><strong>Описание:</strong> @Model.Description</p>
 
-
 <div id="map" style="height: 400px;" class="mb-4"></div>
 
+<hr />
+
+<h4>Филтрирай по дати:</h4>
+<form method="get" class="row mb-4">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="col-md-3">
+        <label for="startDate">Начална дата</label>
+        <input type="date" id="startDate" name="startDate" value="@ViewBag.StartDate" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="endDate">Крайна дата</label>
+        <input type="date" id="endDate" name="endDate" value="@ViewBag.EndDate" class="form-control" />
+    </div>
+    <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-primary mt-2">Филтрирай</button>
+    </div>
+</form>
+
 <h4>Налични туристически пакети:</h4>
-@if (Model.TravelPackages != null && Model.TravelPackages.Any())
+
+@if (ViewBag.FilteredPackages != null && ((List<TouristAgency.Models.TravelPackage>)ViewBag.FilteredPackages).Any())
 {
-    <ul class="list-group">
-        @foreach (var pkg in Model.TravelPackages)
+    var packages = (List<TouristAgency.Models.TravelPackage>)ViewBag.FilteredPackages;
+    <div class="row">
+        @foreach (var pkg in packages)
         {
-            <li class="list-group-item">
-                <a asp-controller="TravelPackages" asp-action="Details" asp-route-id="@pkg.Id">@pkg.Title</a>
-                - @string.Format("{0:C}", pkg.Price)
-            </li>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    @if (pkg.Images != null && pkg.Images.Any())
+                    {
+                        <img src="@Url.Content($"~/uploads/destinations/{pkg.Images.First().ImagePath}")" class="card-img-top" style="height: 200px; object-fit: cover;" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@pkg.Title</h5>
+                        <p class="card-text">@pkg.Description?.Substring(0, Math.Min(pkg.Description.Length, 100))...</p>
+                        <p><strong>Цена:</strong> @pkg.Price.ToString("F2") лв.</p>
+                        <p><strong>Период:</strong> @pkg.StartDate.ToShortDateString() – @pkg.EndDate.ToShortDateString()</p>
+                        <a asp-controller="TravelPackages" asp-action="Details" asp-route-id="@pkg.Id" class="btn btn-outline-primary w-100 mt-2">Виж повече</a>
+                    </div>
+                </div>
+            </div>
         }
-    </ul>
+    </div>
 }
 else
 {
-    <p class="text-muted">В момента няма налични пакети за тази дестинация.</p>
+    <p class="text-muted">Няма налични пакети за избраните дати.</p>
 }
 
 @section Scripts {

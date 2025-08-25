@@ -1,32 +1,106 @@
 ﻿@model TouristAgency.Models.Booking
-
 @{
     ViewData["Title"] = "Детайли за резервация";
+    string StatusClass(string s) => s?.ToLower() switch
+    {
+        "потвърдена" => "bg-success",
+        "изчакваща" => "bg-warning text-dark",
+        "отказана"  => "bg-danger",
+        _ => "bg-secondary"
+    };
 }
 
-<h2>Детайли за резервация</h2>
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="mb-1">Детайли за резервация</h2>
+        <span class="badge @StatusClass(Model.Status) px-3 py-2">@Model.Status</span>
+    </div>
 
-<p><strong>Пакет:</strong> @Model.TravelPackage?.Title</p>
-<p><strong>Дестинация:</strong> @Model.TravelPackage?.Destination?.Name</p>
-<p><strong>Организатор:</strong> @Model.TravelPackage?.TourOperator?.UserName</p>
-<p><strong>Обща цена:</strong> @Model.TotalPrice.ToString("C")</p>
-<p><strong>Места:</strong> @Model.NumberOfSlots</p>
-<p><strong>Статус:</strong> @Model.Status</p>
-<p><strong>Дата:</strong> @Model.CreatedOn.ToShortDateString()</p>
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="row g-4 align-items-stretch">
 
-@if (Model.Passengers != null && Model.Passengers.Any())
-{
-    <h4>Имена на пътници:</h4>
-    <ul>
-        @foreach (var passenger in Model.Passengers)
-        {
-            <li>@passenger.FullName</li>
-        }
-    </ul>
-}
-else
-{
-    <p class="text-muted">Няма записани пътници.</p>
-}
+                <div class="col-md-5 d-flex">
+                    <div class="w-100 ratio ratio-16x9 rounded overflow-hidden border">
+                        @{
+                            var img = Model?.TravelPackage?.Images?.FirstOrDefault();
+                            if (img != null)
+                            {
+                                <img src="@Url.Content($"~/uploads/packages/{img.ImagePath}")"
+                                     alt="Снимка на пакета"
+                                     class="w-100 h-100"
+                                     style="object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center bg-light text-muted">
+                                    Няма изображение
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
 
-<a asp-action="MyBookings" class="btn btn-secondary">Назад</a>
+
+                <div class="col-md-1 d-none d-md-flex px-0">
+                    <div class="vr bg-dark opacity-100 align-self-stretch" style="width:4px;"></div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <h4 class="mb-2">@Model.TravelPackage?.Title</h4>
+                    <p class="text-muted mb-4">@Model.TravelPackage?.Description</p>
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="small text-uppercase text-muted">Дестинация</div>
+                            <div class="fw-semibold">@Model.TravelPackage?.Destination?.Name</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="small text-uppercase text-muted">Организатор</div>
+                            <div class="fw-semibold">@Model.TravelPackage?.TourOperator?.UserName</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="small text-uppercase text-muted">Обща цена</div>
+                            <div class="fw-semibold">@Model.TotalPrice.ToString("C")</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="small text-uppercase text-muted">Места</div>
+                            <div class="fw-semibold">@Model.NumberOfSlots</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="small text-uppercase text-muted">Дата</div>
+                            <div class="fw-semibold">@Model.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <h5 class="mb-3">Пътници</h5>
+                    @if (Model.Passengers != null && Model.Passengers.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var p in Model.Passengers)
+                            {
+                                <li class="list-group-item px-0">@p.FullName</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Няма записани пътници.</p>
+                    }
+
+                    <div class="d-flex gap-2 mt-4">
+                        <a asp-action="Invoice" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                            Виж фактура
+                        </a>
+                        <a asp-action="MyBookings" class="btn btn-secondary">
+                            Назад
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
